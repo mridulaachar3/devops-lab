@@ -1,0 +1,69 @@
+pipeline {
+    agent any
+    stages {
+        stage('Pre-check Docker') {
+            steps {
+                script {
+                    try {
+                        // Check if Docker is installed
+                        def dockerVersion = sh(script: 'docker --version', returnStdout: true).trim()
+                        if (!dockerVersion) {
+                            error "Docker is not installed or not in the PATH. Please install Docker."
+                        }
+
+                        // Check if Docker daemon is running
+                        def dockerInfo = sh(script: 'docker info', returnStatus: true)
+                        if (dockerInfo != 0) {
+                            error "Docker daemon is not running. Please start the Docker service."
+                        }
+
+                        echo "Docker is available and running: ${dockerVersion}"
+                    } catch (Exception e) {
+                        error "Pre-check failed: ${e.message}"
+                    }
+                }
+            }
+        }
+        stage('Setup Workspace') {
+            steps {
+                // Files (delivery_metrics.py, prometheus.yml, alert_rules.yml, Dockerfile)
+                // are checked out from this Git repository into the Jenkins workspace
+                dir('06-Grafana-Prometheus-Monitoring') {
+                    sh 'ls -l'
+                }
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                dir('06-Grafana-Prometheus-Monitoring') {
+                    sh 'docker build -t delivery_metrics .'
+                }
+            }
+        }
+        stage('Create Network') {
+            steps {
+                sh 'docker network create monitoring || true'
+            }
+        }
+        stage('Run Application') {
+            steps {
+                sh 'docker rm -f delivery_metrics || true'
+                sh 'docker run -d --name delivery_metrics --network monitoring -p 8000:8000 delivery_metrics'
+            }
+        }
+        stage('Run Prometheus & Grafana') {
+            steps {
+                dir('06-Grafana-Prometheus-Monitoring') {
+                    sh '''
+                    docker rm -f prometheus grafana || true
+                    docker run -d --name prometheus --network monitoring -p 9090:9090 \
+                      -v $(pwd)/prometheus.yml:/etc/prometheus/prometheus.yml \
+                      -v $(pwd)/alert_rules.yml:/etc/prometheus/alert_rules.yml \
+                      prom/prometheus
+                    docker run -d --name grafana --network monitoring -p 3000:3000 grafana/grafana
+                    '''
+                }
+            }
+        }
+    }
+}
