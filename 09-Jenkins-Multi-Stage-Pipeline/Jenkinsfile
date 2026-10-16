@@ -1,0 +1,61 @@
+pipeline {
+    agent any
+    stages {
+        stage('Build') {
+            steps {
+                echo 'Creating virtual environment and installing dependencies...'
+                dir('09-Jenkins-Multi-Stage-Pipeline') {
+                    sh 'python3 --version'
+                    sh 'python3 -c "import flask; print(\'Flask is available\')"'
+                }
+            }
+        }
+        stage('Test') {
+            steps {
+                echo 'Running tests...'
+                dir('09-Jenkins-Multi-Stage-Pipeline') {
+                    sh 'python3 -m unittest discover -s .'
+                }
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo 'Deploying application...'
+                dir('09-Jenkins-Multi-Stage-Pipeline') {
+                    sh '''
+                    mkdir -p ${WORKSPACE}/python-app-deploy
+                    cp app.py ${WORKSPACE}/python-app-deploy/
+                    ls -l ${WORKSPACE}/python-app-deploy
+                    '''
+                }
+            }
+        }
+        stage('Run Application') {
+            steps {
+                echo 'Running application...'
+                sh '''
+                nohup python3 ${WORKSPACE}/python-app-deploy/app.py > ${WORKSPACE}/python-app-deploy/app.log 2>&1 &
+                echo $! > ${WORKSPACE}/python-app-deploy/app.pid
+                sleep 3
+                cat ${WORKSPACE}/python-app-deploy/app.log
+                '''
+            }
+        }
+        stage('Test Application') {
+            steps {
+                echo 'Testing application...'
+                dir('09-Jenkins-Multi-Stage-Pipeline') {
+                    sh 'python3 test_app.py'
+                }
+            }
+        }
+    }
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Check the logs for more details.'
+        }
+    }
+}
