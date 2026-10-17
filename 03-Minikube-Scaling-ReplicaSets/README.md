@@ -1,83 +1,115 @@
 # Exercise 3: Scaling a Flask App on a Single Node using ReplicaSets
 
 ## Use Case: E-commerce Flash Sale
-During a flash sale (like Big Billion Days), traffic suddenly spikes. A single Pod would crash under the load. A **ReplicaSet** runs multiple identical Pods of the same app and spreads requests across them, then scales back down after the sale.
+During a flash sale (like Big Billion Days or Prime Day), traffic jumps from 100 to 10,000 requests per minute. A single Pod would crash. A **ReplicaSet** runs many identical Pods of the app and spreads requests across them, and scales back down after the sale.
 
 ## Objective
 - Understand ReplicaSets and Pods
-- Scale the Flask app up from 3 to 5 replicas
-- Observe self-healing when a Pod is deleted
-- Observe load distribution across Pods
+- Scale the Flask app
+- Observe Pod distribution and self-healing
 
 ## Files
 | File | Purpose |
 |------|---------|
-| `app.py` | Flash sale Flask app with `/`, `/buy` and `/health` endpoints; responses show which Pod served the request |
-| `Dockerfile` | Builds the app image using gunicorn on port 5000 |
+| `app.py` | Flash sale app: `/` (welcome), `/buy` (checkout, shows serving Pod), `/health` (probes) |
+| `Dockerfile` | python:3.11-slim + flask + gunicorn on port 5000 |
 | `flashsale-replicaset.yaml` | ReplicaSet (3 replicas, readiness/liveness probes, resource limits) + ClusterIP Service |
 
-## Steps and Commands
+## Steps
 
-### 1. Check the single node
-```bash
+### Build and push the image to Docker Hub
+~~~bash
+docker build -t mridula3/flashsale:1.0 .
+docker push mridula3/flashsale:1.0
+~~~
+Image: https://hub.docker.com/r/mridula3/flashsale
+
+### Step 1: Clean up previous Minikube
+~~~bash
+minikube stop
+minikube delete
+~~~
+
+### Step 2: Start Minikube with a single node
+~~~bash
+minikube start --nodes=1 --driver=docker --container-runtime=docker
 kubectl get nodes
-```
+~~~
 
-### 2. Build the image inside Minikube
-```bash
-minikube image build -t flashsale:1.0 .
-```
-
-### 3. Create the ReplicaSet and Service
-```bash
+### Steps 3-4: Create and apply the ReplicaSet
+~~~bash
 kubectl apply -f flashsale-replicaset.yaml
 kubectl get pods
-kubectl get rs
-```
+~~~
+The Pods show `ErrImagePull` at first because the image is only built in Step 5.
 
-### 4. Scale up to 5 replicas
-```bash
+### Step 5: Build the image inside Minikube
+~~~bash
+minikube docker-env
+eval $(minikube docker-env)
+docker build -t flashsale:1.0 .
+kubectl delete pods -l app=flashsale     # restart the failed Pods so they use the new image
+~~~
+
+### Step 6: Verify the Pods and ReplicaSet
+~~~bash
+kubectl get pods
+kubectl get rs
+~~~
+
+### Steps 7-9: Scale to 5 replicas
+~~~bash
 kubectl scale rs flashsale-rs --replicas=5
 kubectl get rs
 kubectl get pods
-```
+~~~
 
-### 5. Delete a Pod and observe self-healing
-```bash
+### Steps 10-11: Delete a Pod and observe self-healing
+~~~bash
 kubectl delete pod <pod-name>
+kubectl get pods
 kubectl get pods -o wide
-```
+~~~
 
-### 6. Send buy requests and observe load distribution
-```bash
-kubectl run buyer --rm -i --restart=Never --image=curlimages/curl -- sh -c 'sleep 5; for i in 1 2 3 4 5 6; do curl -s http://flashsale-svc/buy; echo; done'
-```
+## Notes on the Lab Manual
+- The manual's Dockerfile copies `ex3-flash-sale.py` but runs `app:app`; the file is named `app.py` here so gunicorn can find it.
+- The manual's Step 5 builds `flask-app`, but the YAML uses `flashsale:1.0`; the image is tagged `flashsale:1.0` so the Pods can find it.
+- The manual's scale/delete commands say `flask-app-rs`, but the YAML names the ReplicaSet `flashsale-rs`.
+- Minikube is started with `--container-runtime=docker` so `eval $(minikube docker-env)` works.
 
 ## Output Screenshots
 
-### ReplicaSet created with 3 Pods
-![3 Replicas](screenshots/1.png)
+### Image built and pushed to Docker Hub
+![Docker Push](screenshots/1.png)
 
-### Scaled up to 5 Pods
-![5 Replicas](screenshots/2.png)
+### Image on Docker Hub
+![Docker Hub](screenshots/2.png)
 
-### Deleted Pod automatically replaced (self-healing)
-![Self Healing](screenshots/3.png)
+### Steps 1-2: Minikube cleaned up and started with one node
+![Single Node](screenshots/3.png)
 
-### Buy requests served by different Pods (load distribution)
-![Load Distribution](screenshots/4.png)
+### Steps 3-4: ReplicaSet applied (image not built yet)
+![ErrImagePull](screenshots/4.png)
+
+### Steps 5-6: Image built in Minikube, 3 Pods running
+![3 Replicas](screenshots/5.png)
+
+### Steps 7-9: Scaled to 5 replicas
+![5 Replicas](screenshots/6.png)
+
+### Steps 10-11: Deleted Pod replaced automatically, all Pods on one node
+![Self Healing](screenshots/7.png)
 
 ## Q&A
 1. **Initial number of replicas?** 3
 2. **Pods running after applying the ReplicaSet?** 3
-3. **What happens when scaled to 5?** Kubernetes creates 2 more Pods to reach the desired count of 5.
+3. **What happens when scaled to 5?** Kubernetes creates 2 more Pods to reach 5.
 4. **What happens when one Pod is deleted?** The ReplicaSet automatically creates a new Pod to keep 5 running.
 5. **How does Kubernetes maintain replicas?** It continuously compares the actual Pod count with the desired count and creates or deletes Pods to match.
-6. **How many nodes are running?** 1 (minikube)
-7. **Where are the Pods running?** All 5 Pods run on the single `minikube` node.
+6. **How many nodes are running?** 1
+7. **Where are the Pods running?** All 5 Pods run on the single node `minikube`.
 
-## Learnings
-- **Pod distribution:** each Pod is an identical worker; scaling means creating clones.
-- **Resiliency:** a failed Pod is replaced automatically, so users don't notice downtime.
-- **Efficiency:** add Pods when demand spikes, remove them when demand drops.
-- **Load balancing:** the Service spreads requests across all healthy Pods.
+## Key Learnings
+- **Pod distribution:** each Pod is an identical worker; scaling creates clones of the app.
+- **Resiliency:** if a Pod fails, the ReplicaSet creates another, so users don't notice downtime.
+- **Efficiency:** add Pods when demand spikes and remove them when it drops.
