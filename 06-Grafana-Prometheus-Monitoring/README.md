@@ -93,3 +93,46 @@ docker ps
 - Metric types: **Counter** (only goes up), **Gauge** (goes up and down), **Histogram** (bucketed distribution), **Summary** (count/sum/quantiles).
 - Prometheus **scrapes** (pulls) metrics from targets at a fixed interval and evaluates **alert rules** on them.
 - Grafana uses Prometheus as a **data source** and visualises queries as dashboard panels.
+
+## Jenkins Pipeline (Step 5 of the manual)
+
+The whole monitoring stack is deployed automatically by a Jenkins pipeline defined in `Jenkinsfile`.
+
+### Setup
+Jenkins runs in Docker with access to the host's Docker engine:
+~~~bash
+docker run -d --name jenkins -u root -p 8080:8080 -p 50000:50000 \
+  -v jenkins_home:/var/jenkins_home \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  jenkins/jenkins:lts
+
+docker exec jenkins bash -c "apt-get update && apt-get install -y docker-cli"
+docker exec jenkins git config --global --add safe.directory '*'
+~~~
+
+### Pipeline job
+- New Item → `Delivery-Monitoring-Pipeline` → **Pipeline**
+- Pipeline script from SCM → Git → `https://github.com/mridulaachar3/devops-lab.git`, branch `*/main`
+- Script Path: `06-Grafana-Prometheus-Monitoring/Jenkinsfile`
+
+### Stages
+| Stage | What it does |
+|-------|-------------|
+| Pre-check Docker | Checks Docker is installed and the daemon is running |
+| Setup Workspace | Lists the files checked out from Git |
+| Build Docker Image | Builds `delivery_metrics` and `delivery_prometheus` images |
+| Create Network | Creates the `monitoring` Docker network |
+| Run Application | Starts the delivery metrics app |
+| Run Prometheus & Grafana | Starts Prometheus and Grafana |
+| Verify | Checks containers are up and Prometheus can read the delivery metrics |
+
+> Note: Prometheus config files are copied into a small custom image (`Dockerfile.prometheus`) instead of being bind-mounted, because paths inside the Jenkins container don't exist on the Docker host.
+
+### Jenkins pipeline configuration
+![Pipeline Config](screenshots/8.png)
+
+### All pipeline stages passed
+![Pipeline Stages](screenshots/9.png)
+
+### Jenkins logs: successful pipeline build
+![Jenkins Console](screenshots/10.png)
