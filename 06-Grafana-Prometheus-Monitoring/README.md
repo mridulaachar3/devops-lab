@@ -136,3 +136,29 @@ docker exec jenkins git config --global --add safe.directory '*'
 
 ### Jenkins logs: successful pipeline build
 ![Jenkins Console](screenshots/10.png)
+
+## Step 6: Simulate Alerts
+
+`delivery_metrics.py` was modified to increase pending deliveries above the alert threshold:
+~~~python
+pending = random.randint(50, 100)  # Increase range to exceed alert threshold
+~~~
+The app and Prometheus were then restarted:
+~~~bash
+docker rm -f delivery_metrics prometheus grafana
+docker build -t delivery_metrics .
+docker build -t delivery_prometheus -f Dockerfile.prometheus .
+docker run -d --name delivery_metrics --network monitoring -p 8000:8000 delivery_metrics
+docker run -d --name prometheus --network monitoring -p 9090:9090 delivery_prometheus
+docker run -d --name grafana --network monitoring -p 3000:3000 grafana/grafana
+~~~
+Result: `pending_deliveries` jumps to 50-100 and both alerts fire. (The file in this repo was set back to `randint(10, 20)` afterwards.)
+
+### Pending range changed to 50-100
+![Code Change](screenshots/11.png)
+
+### Prometheus query graph: pending_deliveries
+![Prometheus Graph](screenshots/12.png)
+
+### Both alerts firing
+![Alerts Firing](screenshots/13.png)
