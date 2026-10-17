@@ -5,95 +5,113 @@ An e-commerce platform with two services:
 1. **Product Catalog** (AppA): lists available products, **2 replicas**
 2. **Shopping Cart** (AppB): manages user carts, **3 replicas**
 
-Replicas of each service are spread across **different nodes** using pod anti-affinity, so the store stays available even if one node fails.
+Replicas of each service are spread across multiple nodes (pod anti-affinity), so the store stays available even if one node fails.
 
 ## Files
 | File | Purpose |
 |------|---------|
 | `product_catalog.py` | Flask app: `GET /products` |
-| `shopping_cart.py` | Flask app: `GET /cart` and `POST /cart` |
+| `shopping_cart.py` | Flask app: `GET /cart`, `POST /cart` |
 | `Dockerfile.product` | Image for Product Catalog |
 | `Dockerfile.shopping` | Image for Shopping Cart |
 | `product_catalog_deployment.yaml` | Deployment, 2 replicas, pod anti-affinity |
 | `shopping_cart_deployment.yaml` | Deployment, 3 replicas, pod anti-affinity |
-| `product_catalog_service.yaml` | NodePort Service for Product Catalog |
-| `shopping_cart_service.yaml` | NodePort Service for Shopping Cart |
+| `product_catalog_service.yaml` | NodePort Service |
+| `shopping_cart_service.yaml` | NodePort Service |
 
-## Steps and Commands
+## Steps
 
-### 1. Start a 3-node Minikube cluster
+### Step 0: Clean up any existing Minikube
 ~~~bash
+minikube stop
 minikube delete
-minikube start --nodes 3 -p devops-multinode --driver=docker --memory=2048 --cpus=2
+~~~
+
+### Step 1a: Start Minikube with 3 nodes
+~~~bash
+minikube start --nodes 3 -p devops-multinode --force --container-runtime=docker --memory=2048
 kubectl get nodes
 ~~~
 
-### 2. Build the images
+### Step 1b: Enable the registry add-on
+~~~bash
+minikube -p devops-multinode addons enable registry
+~~~
+
+### Steps 2-4: Create the apps and build the images
 ~~~bash
 docker build -t product-catalog:latest -f Dockerfile.product .
 docker build -t shopping-cart:latest -f Dockerfile.shopping .
+docker images
 ~~~
 
-### 3. Load the images into all nodes
+### Step 5: Load the images into Minikube and verify
 ~~~bash
 minikube -p devops-multinode image load product-catalog:latest
 minikube -p devops-multinode image load shopping-cart:latest
-minikube -p devops-multinode image ls | grep -E "product-catalog|shopping-cart"
+minikube -p devops-multinode ssh -- docker images
 ~~~
 
-### 4. Deploy the apps and services
+### Steps 6-7: Deploy the applications and expose the services
 ~~~bash
 kubectl apply -f product_catalog_deployment.yaml
 kubectl apply -f shopping_cart_deployment.yaml
 kubectl apply -f product_catalog_service.yaml
 kubectl apply -f shopping_cart_service.yaml
+~~~
+
+### Step 8: Verify deployment and distribution
+~~~bash
 kubectl get pods -o wide
 ~~~
 
-### 5. Test Product Catalog
-~~~bash
-minikube -p devops-multinode service product-catalog-service --url
-~~~
-Open `<url>/products` in the browser.
-
-### 6. Test Shopping Cart (GET and POST)
-~~~bash
-kubectl run cart-test --rm -i --restart=Never --image=curlimages/curl -- sh -c 'sleep 5; curl -s http://shopping-cart-service/cart; echo; curl -s -X POST http://shopping-cart-service/cart -H "Content-Type: application/json" -d "{\"id\": 1, \"name\": \"Laptop\", \"quantity\": 1}"; echo'
-~~~
-
-## Result: Pod Distribution
 | App | Replicas | Nodes |
 |-----|----------|-------|
 | product-catalog | 2 | devops-multinode-m02, devops-multinode-m03 |
 | shopping-cart | 3 | devops-multinode, devops-multinode-m02, devops-multinode-m03 |
 
-Each replica of the same app runs on a different node because of `podAntiAffinity` with `topologyKey: kubernetes.io/hostname`.
+### Step 9: Access the services (each in its own terminal)
+~~~bash
+minikube -p devops-multinode service product-catalog-service
+minikube -p devops-multinode service shopping-cart-service
+~~~
 
-## Changes from the Lab Manual
-- The Shopping Cart deployment uses namespace `default` (the manual's `devops-exercise` namespace doesn't exist and doesn't match the Service's namespace).
-- Minikube here uses the containerd runtime, so images are loaded with `minikube image load` and checked with `minikube image ls` instead of the registry add-on and `minikube ssh -- docker images`.
-- `--memory=2048` keeps the 3 nodes within laptop memory; `--force` isn't needed because Minikube isn't run as root.
-- Shopping Cart is tested with `curl` from a temporary pod inside the cluster.
+### Step 10: Test with curl
+~~~bash
+curl http://127.0.0.1:<product-port>/products
+curl http://127.0.0.1:<cart-port>/cart
+curl -X POST http://127.0.0.1:<cart-port>/cart -H "Content-Type: application/json" -d '{"id": 1, "name": "Laptop", "quantity": 1}'
+~~~
+
+## Notes on the Lab Manual
+- `shopping_cart_deployment.yaml` uses namespace `default`: the manual's `devops-exercise` namespace doesn't exist and wouldn't match the Service in `default`.
+- `--container-runtime=docker` is added so `minikube ssh -- docker images` works; `--memory=2048` keeps 3 nodes within laptop memory.
 
 ## Output Screenshots
 
-### 3 nodes ready
+### Step 1a: 3 nodes ready
 ![Nodes](screenshots/1.png)
 
-### Images built
-![Docker Images](screenshots/2.png)
+### Step 1b: Registry add-on enabled
+![Registry](screenshots/2.png)
 
-### Images loaded into Minikube
-![Images Loaded](screenshots/3.png)
+### Step 4: Images built
+![Docker Images](screenshots/3.png)
 
-### Pods distributed across nodes
-![Pod Distribution](screenshots/4.png)
+### Step 5: Images inside Minikube
+![Minikube Images](screenshots/4.png)
 
-### Product Catalog in browser
-![Product Catalog](screenshots/5.png)
+### Steps 6-8: Deployed and distributed across nodes
+![Pod Distribution](screenshots/5.png)
 
-### Shopping Cart GET and POST
-![Shopping Cart](screenshots/6.png)
+### Step 9a: Product Catalog service
+![Product Catalog Service](screenshots/6.png)
+
+### Step 9b: Shopping Cart service
+![Shopping Cart Service](screenshots/7.png)
+
+### Step 10: curl tests
+![Curl Tests](screenshots/8.png)
 
 ## Summary
-Two Python applications were deployed on a multi-node Minikube cluster with replicas, with each Pod of the same app running on a different node. This maximises availability and fault tolerance across the cluster.
+Two Python applications (Product Catalog and Shopping Cart) were deployed on a multi-node Minikube cluster with replicas, with each Pod of the same app running on a different node. This maximises availability and fault tolerance across the cluster.
