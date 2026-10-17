@@ -26,8 +26,7 @@ pipeline {
         }
         stage('Setup Workspace') {
             steps {
-                // Files (delivery_metrics.py, prometheus.yml, alert_rules.yml, Dockerfile)
-                // are checked out from this Git repository into the Jenkins workspace
+                // Files are checked out from this Git repository into the Jenkins workspace
                 dir('06-Grafana-Prometheus-Monitoring') {
                     sh 'ls -l'
                 }
@@ -37,6 +36,7 @@ pipeline {
             steps {
                 dir('06-Grafana-Prometheus-Monitoring') {
                     sh 'docker build -t delivery_metrics .'
+                    sh 'docker build -t delivery_prometheus -f Dockerfile.prometheus .'
                 }
             }
         }
@@ -53,17 +53,27 @@ pipeline {
         }
         stage('Run Prometheus & Grafana') {
             steps {
-                dir('06-Grafana-Prometheus-Monitoring') {
-                    sh '''
-                    docker rm -f prometheus grafana || true
-                    docker run -d --name prometheus --network monitoring -p 9090:9090 \
-                      -v $(pwd)/prometheus.yml:/etc/prometheus/prometheus.yml \
-                      -v $(pwd)/alert_rules.yml:/etc/prometheus/alert_rules.yml \
-                      prom/prometheus
-                    docker run -d --name grafana --network monitoring -p 3000:3000 grafana/grafana
-                    '''
-                }
+                sh '''
+                docker rm -f prometheus grafana || true
+                docker run -d --name prometheus --network monitoring -p 9090:9090 delivery_prometheus
+                docker run -d --name grafana --network monitoring -p 3000:3000 grafana/grafana
+                '''
             }
+        }
+        stage('Verify') {
+            steps {
+                sh 'sleep 10'
+                sh 'docker ps --filter name=delivery_metrics --filter name=prometheus --filter name=grafana'
+                sh 'docker exec prometheus wget -qO- http://delivery_metrics:8000/metrics | grep -E "^(total|pending|on_the_way)_deliveries"'
+            }
+        }
+    }
+    post {
+        success {
+            echo 'Monitoring stack deployed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Check the logs for more details.'
         }
     }
 }
