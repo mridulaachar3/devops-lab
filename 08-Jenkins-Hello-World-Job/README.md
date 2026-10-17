@@ -1,45 +1,72 @@
 # Exercise 8: Creating a "Hello World" Jenkins Job
 
 ## Objective
-Create a shell script, push it to GitHub, and create a Jenkins Freestyle job that pulls the script from GitHub and runs it.
+Create a shell script, push it to a new GitHub repository, and create a Jenkins Freestyle job that pulls the script from GitHub and runs it.
 
-## Files
-| File | Purpose |
-|------|---------|
-| `hello-world.sh` | Shell script that prints "Hello, Jenkins!" |
+## Repository used by Jenkins
+**https://github.com/mridulaachar3/devops-sample-code** (created as per Step 1a of the manual)
+
+A copy of `hello-world.sh` is also kept in this folder for reference.
 
 ## Steps
 
-### 1. Create the script and push it to GitHub
+### 1a. Create a new GitHub repository
+- Name: `devops-sample-code`
+- Description: `A demo repository for Jenkins scripting.`
+- Visibility: Public
+
+### 1b. Authentication
+GitHub authentication is done with the GitHub CLI (`gh auth login`) instead of a personal access token.
+
+### 2. Create the script locally
 ~~~bash
+cat > hello-world.sh << 'SCRIPT'
+#!/bin/bash
+echo "Hello, Jenkins!"
+SCRIPT
 chmod +x hello-world.sh
-./hello-world.sh
-git add .
-git commit -m "Add hello-world.sh for Jenkins job"
-git push
 ~~~
-Note: the script is kept in this `devops-lab` repository (folder `08-Jenkins-Hello-World-Job`) so all exercises are in one place.
 
-### 2. Create a Freestyle job in Jenkins
-- New Item → name `HelloWorld` → Freestyle project → OK
-- Description: `Hello World! Jenkins job.`
+### 3-6. Initialise Git, commit and push
+~~~bash
+git init -b main
+git add hello-world.sh
+git status
+git commit -m "Add hello-world.sh"
+git remote add origin https://github.com/mridulaachar3/devops-sample-code.git
+git push -u origin main
+~~~
 
-### 3. Configure Source Code Management
-- Git → Repository URL: `https://github.com/mridulaachar3/devops-lab.git`
-- Credentials: none (public repository)
-- Branch Specifier: `*/main`
+### 7. Verify the script on GitHub
+`hello-world.sh` is visible in the `devops-sample-code` repository.
 
-### 4. Add a build step
-- Add build step → Execute shell: `sh 08-Jenkins-Hello-World-Job/hello-world.sh`
+## Jenkins Job
+- **New Item** → `HelloWorld` → **Freestyle project**
+- **Description:** `Hello World! Jenkins job.`
+- **Source Code Management:** Git → `https://github.com/mridulaachar3/devops-sample-code.git`, branch `*/main`
+- **Build Steps:** Execute shell → `sh hello-world.sh`
+- **Save → Build Now → Console Output**
 
-### 5. Save and run
-- Save → Build Now → #1 → Console Output
-- Output: `Hello, Jenkins!` and `Finished: SUCCESS`
+## Output
+~~~
+Started by user Mridula
+Fetching upstream changes from https://github.com/mridulaachar3/devops-sample-code.git
+Commit message: "Add hello-world.sh"
++ sh hello-world.sh
+Hello, Jenkins!
+Finished: SUCCESS
+~~~
 
 ## Output Screenshots
 
-### Script on GitHub
-![Script on GitHub](screenshots/1.png)
+### New repository devops-sample-code
+![New Repo](screenshots/1.png)
+
+### Script created, committed and pushed
+![Git Push](screenshots/6.png)
+
+### Script verified on GitHub
+![Script on GitHub](screenshots/7.png)
 
 ### Source Code Management configuration
 ![SCM Config](screenshots/2.png)
