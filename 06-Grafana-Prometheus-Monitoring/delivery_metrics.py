@@ -18,10 +18,10 @@ def simulate_delivery():
 
     total = pending + on_the_way + delivered
 
-    print(f"[DEBUG] Total deliveries: {total}", flush=True)
-    print(f"[DEBUG] Pending deliveries: {pending}", flush=True)
-    print(f"[DEBUG] On-the-way deliveries: {on_the_way}", flush=True)
-    print(f"[DEBUG] Average delivery time: {avg_time:.2f} seconds", flush=True)
+    print(f"[DEBUG] Total deliveries: {total}")
+    print(f"[DEBUG] Pending deliveries: {pending}")
+    print(f"[DEBUG] On-the-way deliveries: {on_the_way}")
+    print(f"[DEBUG] Average delivery time: {avg_time:.2f} seconds")
 
     total_deliveries.set(total)
     pending_deliveries.set(pending)
@@ -29,10 +29,10 @@ def simulate_delivery():
     average_delivery_time.observe(avg_time)
 
 if __name__ == "__main__":
-    print("[INFO] Starting the HTTP server on port 8000...", flush=True)
+    print("[INFO] Starting the HTTP server on port 8000...")
     start_http_server(8000, addr="0.0.0.0")
-    print("[INFO] HTTP server started. Simulating deliveries...", flush=True)
+    print("[INFO] HTTP server started. Simulating deliveries...")
     while True:
         simulate_delivery()
-        print("[INFO] Sleeping for 1 seconds...", flush=True)
+        print("[INFO] Sleeping for 1 seconds...")
         time.sleep(1)
