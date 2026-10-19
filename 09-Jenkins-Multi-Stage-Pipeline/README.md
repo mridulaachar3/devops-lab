@@ -58,10 +58,20 @@ git push
 **Build Now** → all stages pass.
 
 ### Step 8: Handling build errors
-The Jenkins image has no Python, so Python and Flask were installed inside the Jenkins container:
+The Jenkins image has no Python, so the first build fails. As in the manual, log into the Jenkins container as root and install the dependencies:
 ~~~bash
-docker exec -u root jenkins bash -c "apt-get update && apt-get install -y python3 python3-flask"
+docker ps -a
+docker exec -it -u root <container-id> bash
 ~~~
+Inside the container shell (`root@<container-id>:/#`):
+~~~bash
+apt-get update
+apt install -y python3
+apt install -y python3-pip
+apt install -y python3-venv      # manual says python3.11-venv; this Jenkins image ships Python 3.13
+apt install -y python3-flask
+~~~
+> Flask is installed with `apt` (`python3-flask`) because newer Debian blocks system-wide `pip install`.
 
 ## Output Screenshots
 
@@ -82,3 +92,6 @@ docker exec -u root jenkins bash -c "apt-get update && apt-get install -y python
 
 ### Console output: tests OK and Finished SUCCESS
 ![Console Output](screenshots/4.png)
+
+### Step 8: Python, pip, venv and Flask installed inside the Jenkins container
+![Build Errors Fix](screenshots/7.png)
