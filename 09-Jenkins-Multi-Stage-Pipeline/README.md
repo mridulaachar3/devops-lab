@@ -98,5 +98,3 @@ The manual's exact `apt install python3.11-venv` was tried first. It fails with 
 ### Step 8: Python, pip, venv and Flask installed inside the Jenkins container
 ![Build Errors Fix](screenshots/7.png)
 
-### Step 8: manual's python3.11-venv not available, python3-venv used instead
-![venv](screenshots/8.png)
