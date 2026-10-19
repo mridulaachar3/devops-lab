@@ -24,16 +24,17 @@ Jenkins is an open-source automation server used to build, test and deploy softw
 
 ### 1. Run Jenkins in Docker
 ```bash
-docker run -d --name jenkins -p 8080:8080 -p 50000:50000 -v jenkins_home:/var/jenkins_home jenkins/jenkins:lts
-docker ps
+docker run -d --name jenkins -p 8080:8080 -p 50000:50000 jenkins/jenkins:lts
+docker ps -a
 ```
 - `-p 8080:8080`: Jenkins web UI
 - `-p 50000:50000`: agent communication port
-- `-v jenkins_home:/var/jenkins_home`: keeps Jenkins data across restarts
+- (Exercises 6, 8 and 9 reuse a Jenkins started with `-v jenkins_home:/var/jenkins_home` so jobs survive restarts)
 
 ### 2. Get the initial admin password
 ```bash
-docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
+docker exec -it <container-id> bash
+cat /var/jenkins_home/secrets/initialAdminPassword
 ```
 
 ### 3. Unlock Jenkins
