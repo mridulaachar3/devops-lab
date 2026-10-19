@@ -41,7 +41,8 @@ kubectl describe deployment flask-app
 
 ### Step 10: View the logs
 ~~~bash
-kubectl logs deployment/flask-app
+kubectl get pods -l app=flask-app       # copy the pod name
+kubectl logs <pod-name>                 # e.g. kubectl logs flask-app-59f7cdccb4-n29dr
 ~~~
 
 ### Steps 11-12: Check services and try to access the app
