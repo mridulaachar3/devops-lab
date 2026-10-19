@@ -26,54 +26,41 @@ pipeline {
         }
         stage('Setup Workspace') {
             steps {
-                // Files are checked out from this Git repository into the Jenkins workspace
-                dir('06-Grafana-Prometheus-Monitoring') {
-                    sh 'ls -l'
+                script {
+                    // Define the local source path where the files are located
+                    def localSourcePath = "${env.WORKSPACE}/06-Grafana-Prometheus-Monitoring" // Files checked out from GitHub
+                    def workspacePath = env.WORKSPACE
+
+                    // Copy necessary files into the Jenkins workspace
+                    sh """
+                    cp ${localSourcePath}/delivery_metrics.py ${workspacePath}/
+                    cp ${localSourcePath}/prometheus.yml ${workspacePath}/
+                    cp ${localSourcePath}/alert_rules.yml ${workspacePath}/
+                    cp ${localSourcePath}/Dockerfile ${workspacePath}/
+                    """
                 }
             }
         }
         stage('Build Docker Image') {
             steps {
-                dir('06-Grafana-Prometheus-Monitoring') {
-                    sh 'docker build -t delivery_metrics .'
-                    sh 'docker build -t delivery_prometheus -f Dockerfile.prometheus .'
-                }
-            }
-        }
-        stage('Create Network') {
-            steps {
-                sh 'docker network create monitoring || true'
+                sh 'docker build -t delivery_metrics .'
             }
         }
         stage('Run Application') {
             steps {
-                sh 'docker rm -f delivery_metrics || true'
-                sh 'docker run -d --name delivery_metrics --network monitoring -p 8000:8000 delivery_metrics'
+                sh 'docker run -d -p 8000:8000 --name delivery_metrics delivery_metrics'
             }
         }
         stage('Run Prometheus & Grafana') {
             steps {
                 sh '''
-                docker rm -f prometheus grafana || true
-                docker run -d --name prometheus --network monitoring -p 9090:9090 delivery_prometheus
-                docker run -d --name grafana --network monitoring -p 3000:3000 grafana/grafana
+                docker create --name prometheus -p 9090:9090 prom/prometheus
+                docker cp $WORKSPACE/prometheus.yml prometheus:/etc/prometheus/prometheus.yml
+                docker cp $WORKSPACE/alert_rules.yml prometheus:/etc/prometheus/alert_rules.yml
+                docker start prometheus
+                docker run -d --name grafana -p 3000:3000 grafana/grafana
                 '''
             }
-        }
-        stage('Verify') {
-            steps {
-                sh 'sleep 10'
-                sh 'docker ps --filter name=delivery_metrics --filter name=prometheus --filter name=grafana'
-                sh 'docker exec prometheus wget -qO- http://delivery_metrics:8000/metrics | grep -E "^(total|pending|on_the_way)_deliveries"'
-            }
-        }
-    }
-    post {
-        success {
-            echo 'Monitoring stack deployed successfully!'
-        }
-        failure {
-            echo 'Pipeline failed. Check the logs for more details.'
         }
     }
 }

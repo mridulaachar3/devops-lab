@@ -11,8 +11,7 @@ As a DevOps engineer at ZAPPTTO (a fast-paced delivery service), build a monitor
 | `alert_rules.yml` | Alert rules: HighPendingDeliveries and HighAverageDeliveryTime |
 | `grafana-dashboard.json` | Grafana dashboard with the 4 panels from the manual |
 | `Dockerfile` | Builds the delivery metrics app into an image (used by the Jenkins pipeline) |
-| `Dockerfile.prometheus` | Prometheus image with the two config files copied in (used by the Jenkins pipeline) |
-| `Jenkinsfile` | Jenkins pipeline that builds and runs the whole monitoring stack |
+| `Jenkinsfile` | The manual's Jenkins pipeline (Step 5b), with only the lines that can't run as written changed |
 
 ## Metrics
 | Metric | Type | Meaning |
@@ -120,14 +119,17 @@ docker exec jenkins git config --global --add safe.directory '*'
 | Stage | What it does |
 |-------|-------------|
 | Pre-check Docker | Checks Docker is installed and the daemon is running |
-| Setup Workspace | Lists the files checked out from Git |
-| Build Docker Image | Builds the `delivery_metrics` and `delivery_prometheus` images |
-| Create Network | Creates the `monitoring` Docker network |
-| Run Application | Starts the delivery metrics app in a container (port 8000) |
-| Run Prometheus & Grafana | Starts Prometheus and Grafana |
-| Verify | Checks the containers are up and the delivery metrics can be read |
+| Setup Workspace | Copies `delivery_metrics.py`, `prometheus.yml`, `alert_rules.yml` (and the `Dockerfile`) into the Jenkins workspace |
+| Build Docker Image | `docker build -t delivery_metrics .` |
+| Run Application | `docker run -d -p 8000:8000 --name delivery_metrics delivery_metrics` |
+| Run Prometheus & Grafana | Starts Prometheus with the two config files, and Grafana |
 
-> Notes: inside Jenkins, the app runs as a container instead of a host script, and the Prometheus config files are copied into a small image (`Dockerfile.prometheus`) instead of being bind-mounted, because paths inside the Jenkins container don't exist on the Docker host. The Jenkinsfile uses files from the Git checkout instead of a hard-coded local path.
+> The Jenkinsfile is the manual's Step 5b file with the same 5 stages. Only 3 things were changed, because they can't run as written:
+> - `localSourcePath` points to the folder checked out from GitHub instead of the placeholder `/path/to/your/local/files`.
+> - `Dockerfile` is also copied into the workspace, so `docker build -t delivery_metrics .` finds it.
+> - Prometheus is started with `docker create` + `docker cp` (the two yml files) + `docker start` instead of `-v $WORKSPACE/...` bind mounts. Jenkins runs inside Docker, so `$WORKSPACE` paths exist only inside the Jenkins container, not on the Docker host that would mount them.
+>
+> Before each run, old containers are removed with `docker rm -f delivery_metrics prometheus grafana`, because the manual's pipeline starts them with fixed names.
 
 ### Jenkins pipeline configuration
 ![Pipeline Config](screenshots/8.png)
