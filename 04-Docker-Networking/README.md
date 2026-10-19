@@ -38,8 +38,10 @@ docker ps
 
 ### Task 5: Test connectivity between containers
 ```bash
-docker exec flask ping -c 3 mysql
-docker exec flask ping -c 3 redis
+docker exec -it flask bash
+ping mysql     # Ctrl+C to stop
+ping redis     # Ctrl+C to stop
+exit
 ```
 Open `http://localhost:5001/about` in the browser.
 
