@@ -19,5 +19,8 @@ This repository contains my solutions for all 10 DevOps lab exercises, with code
 | 9 | Jenkins Multi-Stage Pipeline | [09-Jenkins-Multi-Stage-Pipeline](09-Jenkins-Multi-Stage-Pipeline) |
 | 10 | Multi-Node Minikube with Multiple Apps | [10-Minikube-Multi-Node-Multi-App](10-Minikube-Multi-Node-Multi-App) |
 
+**Second repository (used by Jenkins in Exercises 8 and 9, as the manual asks):** https://github.com/mridulaachar3/devops-sample-code
+(Copies of its files are also kept in the Exercise 8 and 9 folders.)
+
 ## Tools Used
 Docker, Kubernetes (Minikube), kubectl, Jenkins, Prometheus, Grafana, Git, GitHub
