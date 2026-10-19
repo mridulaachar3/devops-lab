@@ -32,6 +32,7 @@ All exercises were done on **Windows 11 + WSL2 (Ubuntu) + Docker Desktop**, foll
 | 4 | MySQL root password, Werkzeug pinned, `ping` installed inside the container | MySQL exits without a password; Flask 2.0.1 crashes with newer Werkzeug; `python:3.9-slim` has no `ping` |
 | 5 | AppArmor profile could not be loaded | The WSL2 kernel has AppArmor disabled; all steps were run and the errors are documented |
 | 6 | `host.docker.internal` instead of `172.17.0.1`; `-p 9090:9090` instead of `--network=host` | The manual's own note says to use `host.docker.internal` on Windows; host networking doesn't publish ports on Docker Desktop |
+| 6 | Jenkinsfile: `localSourcePath` set to the Git checkout, `Dockerfile` also copied, Prometheus configs added with `docker cp` | The manual's path is a placeholder; `-v $WORKSPACE/...` mounts don't work when Jenkins itself runs in Docker |
 | 7 | Suggested plugins installed with `jenkins-plugin-cli` | The setup wizard's plugin download was blocked on this network |
 | 9 | `python3-venv` instead of `python3.11-venv` | The Jenkins image ships Python 3.13 |
 | 10 | Namespace `default` instead of `devops-exercise` | The manual never creates the `devops-exercise` namespace |
