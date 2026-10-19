@@ -1,13 +1,6 @@
 # Use the official Python image from the Docker Hub
 FROM python:3.9-slim
 
-# Install ping so we can test connectivity between containers
-# (package sources switched to https because plain http is blocked on this network)
-RUN sed -i 's|http://|https://|g' /etc/apt/sources.list.d/debian.sources \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends iputils-ping \
-    && rm -rf /var/lib/apt/lists/*
-
 # Set the working directory in the container
 WORKDIR /app
 

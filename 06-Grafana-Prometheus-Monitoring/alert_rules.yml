@@ -11,7 +11,7 @@ groups:
           description: "Pending deliveries are above 10 for the last 15 second."
 
       - alert: HighAverageDeliveryTime
-        expr: (average_delivery_time_sum / average_delivery_time_count) > 30
+        expr:  (average_delivery_time_sum / average_delivery_time_count) > 30
         labels:
           severity: critical
         annotations:

@@ -14,7 +14,7 @@ A web application made of three containers:
 |------|---------|
 | `app.py` | Flask REST API with an `/about` endpoint on port 5001 |
 | `requirements.txt` | Python dependencies (Flask 2.0.1, Werkzeug 2.0.3) |
-| `Dockerfile` | Builds the Flask image (also installs `ping` for connectivity tests) |
+| `Dockerfile` | Builds the Flask image (exactly as in the manual) |
 
 ## Steps and Commands
 
@@ -39,11 +39,15 @@ docker ps
 ### Task 5: Test connectivity between containers
 ```bash
 docker exec -it flask bash
-ping mysql     # Ctrl+C to stop
-ping redis     # Ctrl+C to stop
+```
+Inside the container (`python:3.9-slim` has no `ping`, so it is installed first):
+```bash
+sed -i 's|http://|https://|g' /etc/apt/sources.list.d/debian.sources
+apt-get update && apt-get install -y iputils-ping
+ping -c 4 mysql
+ping -c 4 redis
 exit
 ```
-Open `http://localhost:5001/about` in the browser.
 
 ### Task 6: Clean up
 ```bash
@@ -52,10 +56,9 @@ docker network rm my-bridge-net
 ```
 
 ## Changes from the Lab Manual
-- `app.run(host='0.0.0.0', ...)`: Flask must listen on all interfaces to be reachable through `-p 5001:5001`.
 - `Werkzeug==2.0.3` pinned: Flask 2.0.1 is incompatible with newer Werkzeug versions.
 - `MYSQL_ROOT_PASSWORD` set: the MySQL container exits immediately without it.
-- `iputils-ping` installed in the image (over https): `python:3.9-slim` does not include `ping`.
+- `iputils-ping` installed inside the running container (Dockerfile left exactly as in the manual); apt sources switched to https because plain http is blocked on this network.
 
 ## Output Screenshots
 
@@ -73,9 +76,6 @@ docker network rm my-bridge-net
 
 ### Flask container pinging MySQL and Redis by name
 ![Ping Test](screenshots/5.png)
-
-### Flask API in browser
-![Browser](screenshots/6.png)
 
 ### Cleanup
 ![Cleanup](screenshots/7.png)
