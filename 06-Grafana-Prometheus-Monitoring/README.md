@@ -167,6 +167,15 @@ Result: `pending_deliveries` jumps from 10-20 to 50-100, and the **HighPendingDe
 ### Grafana: HighPendingDeliveries firing
 ![Grafana Alerts](screenshots/14.png)
 
+### Expected Output 2: Prometheus query graphs
+The manual's Expected Outputs ask for Prometheus graphs of `total_deliveries`, `pending_deliveries` and `average_delivery_time`. The `pending_deliveries` graph is shown above.
+
+`total_deliveries`:
+![Total Deliveries Graph](screenshots/15.png)
+
+`average_delivery_time_sum / average_delivery_time_count`:
+![Average Delivery Time Graph](screenshots/16.png)
+
 ## Learnings
 - `start_http_server` from `prometheus_client` automatically creates the `/metrics` endpoint.
 - Metric types: **Counter** (only goes up), **Gauge** (goes up and down), **Histogram** (bucketed distribution), **Summary** (count/sum/quantiles).
