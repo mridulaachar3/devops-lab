@@ -17,7 +17,27 @@ Learn Kubernetes basics using Minikube: set up a single-node cluster and deploy 
 minikube start --driver=docker --container-runtime=docker
 ~~~
 
-### Steps 2-3: Create app.py and Dockerfile
+### Step 2: Create app.py
+~~~python
+from flask import Flask
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Hello from Flask on Kubernetes!"
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=15000)
+~~~
+
+### Step 3: Create the Dockerfile
+~~~dockerfile
+FROM python:3.8-slim
+WORKDIR /app
+COPY . /app
+RUN pip install flask
+CMD ["python", "app.py"]
+~~~
 
 ### Step 4: Build the image with Minikube's Docker daemon
 ~~~bash

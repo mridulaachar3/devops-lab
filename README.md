@@ -1,8 +1,11 @@
 # DevOps Lab Exercises
 
-**Name:** Mridula
-**Branch:** Information Science and Engineering
-**College:** BMS College of Engineering, Bengaluru
+| Field | Details |
+|---|---|
+| Name | Mridula Raghunath Achar |
+| USN | 1BM23IS147 |
+| Branch | Information Science and Engineering |
+| College | BMS College of Engineering, Bengaluru |
 
 This repository contains my solutions for all 10 DevOps lab exercises, with code, commands and output screenshots.
 
