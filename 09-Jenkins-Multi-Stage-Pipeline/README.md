@@ -76,6 +76,28 @@ apt install -y python3-flask
 
 The manual's exact `apt install python3.11-venv` was tried first. It fails with `Unable to locate package python3.11-venv`, because this Jenkins image ships Python 3.13, so `python3-venv` (the matching version) is used instead.
 
+## Expected Outcome (from the manual)
+- **Build stage:** `pip install -r requirements.txt` installs Flask and the other dependencies.
+- **Test stage:** the `unittest` framework runs the test cases and they pass.
+- **Deploy stage:** the application file (`app.py`) is copied to the deploy folder.
+- The console output ends with `Finished: SUCCESS`.
+
+The result of this run is in the screenshots below: all stages passed and the console shows `Finished: SUCCESS`.
+
+## Additional Enhancements (from the manual)
+The manual suggests these optional extensions. They are not part of the numbered steps and are not included in this pipeline.
+- Add a **Code Quality** stage with a tool such as flake8 or pylint:
+```groovy
+stage('Code Quality') {
+    steps {
+        echo 'Running code quality checks...'
+        sh 'flake8 .'
+    }
+}
+```
+- Deploy the application to a Docker container as part of the pipeline.
+- Integrate notifications (e.g. email or Slack) for pipeline success or failure.
+
 ## Output Screenshots
 
 ### App files pushed to devops-sample-code

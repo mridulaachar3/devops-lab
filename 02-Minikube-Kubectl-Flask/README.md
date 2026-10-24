@@ -80,6 +80,35 @@ curl http://127.0.0.1:<port>                # in a new terminal
 ~~~
 Flow: External request → Service (port 15000) → Container (targetPort 15000) → Flask app.
 
+## Minikube Cheat Sheet (from the manual)
+Frequently used Minikube commands listed at the start of the manual's Exercise 2:
+```bash
+# 1. Starting and stopping Minikube
+minikube start                                 # Start Minikube with default settings
+minikube start --kubernetes-version=v1.21.2    # Start with a specific Kubernetes version
+minikube stop                                  # Stop Minikube without deleting
+minikube delete                                # Delete the Minikube cluster
+
+# 2. Checking status and information
+minikube status                                # Check Minikube status
+kubectl cluster-info                           # Display cluster information
+
+# 3. Accessing services
+minikube service <service-name>                # Open the specified service in the browser
+minikube service list                          # List URLs of all services
+minikube tunnel                                # Create a network tunnel to access LoadBalancer services
+
+# 4. Docker with Minikube
+eval $(minikube docker-env)                    # Use Minikube's Docker daemon
+docker build -t my-image .                     # Build an image directly in Minikube
+minikube image load my-image                   # Load a local image into Minikube
+
+# 5. Debugging and logs
+minikube logs                                  # View Minikube logs
+minikube dashboard                             # Open the Kubernetes dashboard
+minikube ssh                                   # SSH into the Minikube node
+```
+
 ## Output Screenshots
 
 ### Step 4: minikube docker-env and docker build

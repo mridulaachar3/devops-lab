@@ -29,7 +29,7 @@ Host → Flask uses the published port `-p 5001:5001`. Flask → MySQL and Flask
 
 ## Steps and Commands
 
-### Part 1–3: Verify Docker and create the network
+### Task 1 and Task 2 (Parts 1–3): Create the bridge network and verify it
 ```bash
 docker --version
 docker info
@@ -38,12 +38,12 @@ docker network create --driver bridge my-bridge-net
 docker network ls
 ```
 
-### Part 4: Inspect the network
+### Task 3 (Part 4): Inspect the network
 ```bash
 docker network inspect my-bridge-net
 ```
 
-### Part 5–7: Create app.py, requirements.txt and Dockerfile
+### Task 4 (Parts 5–7): Create app.py, requirements.txt and Dockerfile
 `app.py` (Part 5): note `host='0.0.0.0'`, so Flask listens on all interfaces inside the container, not only on `127.0.0.1`.
 ```python
 from flask import Flask, jsonify
@@ -88,20 +88,20 @@ EXPOSE 5001
 CMD ["python", "app.py"]
 ```
 
-### Part 8: Build the Flask image
+### Task 4 (Part 8): Build the Flask image
 ```bash
 docker build --no-cache -t flask-api .
 docker images
 ```
 
-### Part 9: Test the Flask image on its own
+### Task 4 (Part 9): Test the Flask image on its own
 ```bash
 docker run -d --name flask-test -p 5001:5001 flask-api
 docker ps
 curl http://localhost:5001/about
 ```
 
-### Part 10–13: Start MySQL, Redis and Flask on the same network
+### Task 4 (Parts 10–13): Launch MySQL, Redis and Flask on the same network
 ```bash
 docker run -d --name mysql --network my-bridge-net \
   -e MYSQL_ROOT_PASSWORD=rootpass -e MYSQL_DATABASE=devopsdb mysql:latest
@@ -113,13 +113,13 @@ docker network inspect my-bridge-net     # mysql, redis and flask listed under "
 ```
 Part 14: `-p HOST_PORT:CONTAINER_PORT`. `-p 5001:5001` maps host port 5001 to container port 5001. It is only needed for access from outside the Docker network.
 
-### Part 15: Test the Flask API from the host
+### Task 5 (Part 15): Test connectivity, Flask API from the host
 ```bash
 curl http://localhost:5001/about
 docker port flask
 ```
 
-### Part 16–17: Enter the Flask container and test DNS
+### Task 5 (Parts 16–17): Enter the Flask container and test DNS
 ```bash
 docker exec -it flask bash
 ```
@@ -134,14 +134,14 @@ getent hosts redis
 exit
 ```
 
-### Part 18–19: Test Redis and MySQL
+### Task 5 (Parts 18–19): Test Redis and MySQL
 ```bash
 docker exec -it redis redis-cli ping
 docker exec -it mysql mysql -uroot -prootpass -e "SHOW DATABASES;"
 ```
 Expected: `PONG`, and a database list including `devopsdb`.
 
-### Part 21: Verify everything
+### Task 5 (Part 21): Verify everything
 ```bash
 docker ps
 docker port flask
@@ -150,7 +150,7 @@ docker exec flask getent hosts mysql
 docker exec flask getent hosts redis
 ```
 
-### Part 25–26: Clean up
+### Task 6 (Parts 25–26): Clean up
 ```bash
 docker stop mysql redis flask
 docker rm mysql redis flask

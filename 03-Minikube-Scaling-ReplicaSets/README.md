@@ -114,3 +114,16 @@ kubectl get pods -o wide
 - **Resiliency:** if a Pod fails, the ReplicaSet creates another, so users don't notice downtime.
 - **Efficiency:** add Pods when demand spikes and remove them when it drops.
 - **Scalability in the real world:** this is how Netflix, YouTube or Swiggy scale their microservices to handle peak traffic hours.
+
+## Additional Challenges and Tips (from the manual)
+These are listed at the end of the manual's Exercise 3. They are not part of the numbered steps above.
+
+**Additional challenges**
+- Update `replicaset.yaml` to use a different image.
+- Create a Deployment instead of a ReplicaSet.
+- Use `kubectl describe` to inspect the ReplicaSet and Pods.
+
+**Tips and variations**
+- `kubectl get pods -o wide`: shows Pod distribution across nodes.
+- `kubectl logs <pod-name>`: shows the logs of a Pod.
+- `kubectl exec -it <pod-name> -- sh`: opens a shell in a Pod's container.

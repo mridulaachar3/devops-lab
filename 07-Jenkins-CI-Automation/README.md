@@ -20,6 +20,53 @@ Jenkins is an open-source automation server used to build, test and deploy softw
 | Plugins | Extensions that add features (Git, Pipeline, etc.) |
 | Nodes | Machines where jobs run (controller / agents) |
 
+## More from the Manual: CI and Jenkins Theory
+
+### Key features of CI
+1. **Frequent code integration:** developers commit code to a shared repository multiple times a day.
+2. **Automated builds:** every commit triggers an automated build to verify the change.
+3. **Automated testing:** automated tests run as part of CI to make sure functionality stays intact.
+4. **Immediate feedback:** developers get quick feedback and can fix issues promptly.
+
+### Benefits of CI
+- **Early bug detection:** integration issues are found early, which reduces the cost of fixing bugs.
+- **Improved collaboration:** developers work on the same codebase and changes are integrated smoothly.
+- **Faster development cycles:** automated builds and tests speed up development.
+- **High-quality code:** continuous testing keeps quality high and prevents regressions.
+
+### How CI works
+1. **Developer workflow:** developers write code and push changes to the version control system (e.g. Git).
+2. **CI server workflow:** the CI server (e.g. Jenkins, GitLab CI) detects the change and triggers the build.
+3. **Automated build:** the code is compiled, dependencies are resolved and the application is built.
+4. **Automated testing:** unit tests, integration tests and other automated tests verify functionality.
+5. **Feedback:** the result (success or failure) is sent back to the developers.
+
+### CI tools (the manual's list of 10)
+| # | Tool | Overview |
+|---|------|----------|
+| 1 | GitLab CI/CD | Part of GitLab's platform; CI/CD integrated directly with Git repositories |
+| 2 | CircleCI | Cloud-based CI/CD tool, easy to integrate with GitHub and Bitbucket |
+| 3 | Travis CI | CI service for open-source and private projects, popular in open source |
+| 4 | Bamboo | CI/CD tool by Atlassian, integrates with JIRA and Bitbucket |
+| 5 | TeamCity | CI/CD server from JetBrains with many integrations and advanced features |
+| 6 | Azure DevOps (Pipelines) | Microsoft's CI/CD pipelines, part of its DevOps suite |
+| 7 | GitHub Actions | GitHub's CI/CD solution for automating workflows from your repositories |
+| 8 | Spinnaker | Open-source continuous delivery and application management tool for cloud-native applications |
+| 9 | Buildkite | Hybrid CI/CD platform that runs pipelines on your own infrastructure with scalability |
+| 10 | Drone | Modern CI/CD platform that uses a lightweight, containerized approach to build pipelines |
+
+### CI workflow example
+1. **Code change:** a developer pushes code to a Git repository.
+2. **Trigger build:** the CI server detects the push and triggers a build.
+3. **Run tests:** automated tests validate the code.
+4. **Feedback:** developers get feedback about the build and test results.
+
+### Why use Jenkins?
+- **Automation:** automates repetitive tasks.
+- **Continuous integration:** ensures that code changes integrate smoothly.
+- **Extensibility:** supports plugins for various tools and services.
+- **Scalability:** can run distributed builds on multiple machines.
+
 ## Steps and Commands
 
 ### 1. Run Jenkins in Docker
