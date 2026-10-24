@@ -205,3 +205,6 @@ docker network ls
 - A published port (`-p`) is the entry point from the host; containers on the same network talk directly without published ports.
 - Inside a container, Flask must bind to `0.0.0.0` to be reachable through a published port.
 - Pinning dependency versions (Flask + Werkzeug) keeps builds reproducible.
+
+## Result
+The Flask API, MySQL and Redis containers ran on the user-defined network `my-bridge-net`. The Flask API was reachable from the host through the published port 5001. Inside the Flask container, the names `mysql` and `redis` resolved through Docker's DNS, Redis answered `PONG`, and MySQL listed its databases. The containers and the network were then removed.

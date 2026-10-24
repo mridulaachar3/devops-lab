@@ -8,6 +8,9 @@ During a flash sale (like Big Billion Days or Prime Day), traffic jumps from 100
 - Scale the Flask app
 - Observe Pod distribution and self-healing
 
+## Environment
+Windows 11 + WSL2 (Ubuntu) + Docker Desktop; Minikube (Docker driver, started with `--container-runtime=docker`) and kubectl.
+
 ## Files
 | File | Purpose |
 |------|---------|
@@ -127,3 +130,6 @@ These are listed at the end of the manual's Exercise 3. They are not part of the
 - `kubectl get pods -o wide`: shows Pod distribution across nodes.
 - `kubectl logs <pod-name>`: shows the logs of a Pod.
 - `kubectl exec -it <pod-name> -- sh`: opens a shell in a Pod's container.
+
+## Result
+The ReplicaSet started 3 Pods once the image was built inside Minikube. Scaling to 5 replicas created 2 more Pods. When one Pod was deleted, the ReplicaSet created a replacement automatically, and all 5 Pods ran on the single node `minikube`.

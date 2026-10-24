@@ -67,6 +67,9 @@ Jenkins is an open-source automation server used to build, test and deploy softw
 - **Extensibility:** supports plugins for various tools and services.
 - **Scalability:** can run distributed builds on multiple machines.
 
+## Environment
+Windows 11 + WSL2 (Ubuntu) + Docker Desktop; Jenkins runs in a Docker container (`jenkins/jenkins:lts`, UI on port 8080).
+
 ## Steps and Commands
 
 ### 1. Run Jenkins in Docker
@@ -115,3 +118,15 @@ docker restart jenkins
 
 ### Installed plugins
 ![Installed Plugins](screenshots/5.png)
+
+## Changes from the Manual
+- The suggested plugins were installed with `jenkins-plugin-cli` instead of the setup wizard, because the wizard's plugin download was blocked on this network.
+
+## Learnings
+- Continuous Integration means merging code often and building and testing every change automatically, so problems are found early.
+- Jenkins can run in a Docker container: port 8080 serves the web UI and port 50000 is for agent connections.
+- The first login needs the generated admin password from `/var/jenkins_home/secrets/initialAdminPassword`.
+- Plugins add features to Jenkins, such as Git and Pipeline support.
+
+## Result
+Jenkins ran in Docker, was unlocked with the initial admin password, got the suggested plugins installed, and the dashboard opened at `http://localhost:8080`.

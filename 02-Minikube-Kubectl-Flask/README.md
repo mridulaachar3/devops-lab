@@ -3,6 +3,9 @@
 ## Objective
 Learn Kubernetes basics using Minikube: set up a single-node cluster and deploy a Python Flask application using kubectl and a YAML file.
 
+## Environment
+Windows 11 + WSL2 (Ubuntu) + Docker Desktop; Minikube (Docker driver, started with `--container-runtime=docker`) and kubectl.
+
 ## Files
 | File | Purpose |
 |------|---------|
@@ -143,3 +146,9 @@ minikube ssh                                   # SSH into the Minikube node
 8. **Command to expose a service?** `kubectl expose` or `kubectl apply -f <service.yaml>`.
 9. **How does Minikube help?** It runs a single-node Kubernetes cluster locally for testing.
 10. **Role of kubectl?** The Kubernetes CLI used to deploy, scale and manage resources in the cluster.
+
+## Changes from the Manual
+- `minikube start` uses `--container-runtime=docker`. This is needed for `minikube docker-env` (building images inside Minikube) to work.
+
+## Result
+The Flask app was built inside Minikube's Docker daemon and deployed with a Deployment. Without a Service, `curl` to the app fails. After a NodePort Service (port 15000 → targetPort 15000) was added to the YAML, `minikube service flask-app-service --url` gave a URL and `curl` returned "Hello from Flask on Kubernetes!".

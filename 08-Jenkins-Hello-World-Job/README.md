@@ -3,6 +3,9 @@
 ## Objective
 Create a shell script, push it to a new GitHub repository, and create a Jenkins Freestyle job that pulls the script from GitHub and runs it.
 
+## Environment
+Windows 11 + WSL2 (Ubuntu) + Docker Desktop; Jenkins runs in a Docker container (`jenkins/jenkins:lts`, UI on port 8080).
+
 ## Repository used by Jenkins
 **https://github.com/mridulaachar3/devops-sample-code** (created as per Step 1a of the manual)
 
@@ -80,3 +83,14 @@ Finished: SUCCESS
 
 ### Successful build on the job page
 ![Job Page](screenshots/5.png)
+
+## Changes from the Manual
+- `git init -b main` instead of plain `git init`, so the local branch is `main` and the manual's `git push -u origin main` works.
+- GitHub login with the GitHub CLI (`gh auth login`) instead of a personal access token.
+
+## Learnings
+- A Freestyle project can pull a script from a Git repository (Source Code Management) and run it with an Execute shell build step.
+- The Console Output of a build shows the Git fetch, the commands run, and the final status.
+
+## Result
+The `HelloWorld` job fetched `hello-world.sh` from `devops-sample-code`, ran it, printed `Hello, Jenkins!` and finished with `Finished: SUCCESS`.

@@ -183,3 +183,6 @@ The manual's Expected Outputs ask for Prometheus graphs of `total_deliveries`, `
 - `host.docker.internal` lets a container reach a service running on the host machine.
 - Grafana uses Prometheus as a **data source**, shows the queries as dashboard panels, and also lists Prometheus alert rules.
 - Jenkins can automate the whole build-and-deploy of the monitoring stack.
+
+## Result
+The Python app exposed the delivery metrics at `/metrics`, Prometheus scraped them (targets UP), and Grafana showed the four dashboard panels. The Jenkins pipeline built and started the monitoring stack. After `pending_deliveries` was raised to 50-100, the `HighPendingDeliveries` alert fired in both Prometheus and Grafana.

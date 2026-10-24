@@ -65,3 +65,9 @@ What happens inside Kubernetes when `kubectl run hello-k8s --image=nginx --port=
 7. **kubelet → kube-apiserver:** the kubelet reports back "Pod `hello-k8s` is running", which is the status shown by `kubectl get pods`.
 
 Other components in the diagram: the control plane also has **kube-controller-manager** and **cloud-controller-manager**, and each worker node has **kube-proxy**.
+
+## Changes from the Manual
+None. The commands are the manual's. With the Docker driver on WSL, `minikube service` runs through a tunnel, so the terminal must stay open (see Step 5).
+
+## Result
+The Pod `hello-k8s` ran on Minikube, was exposed through a NodePort Service, and the Nginx welcome page opened in the browser. This is the expected outcome of the manual.

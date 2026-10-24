@@ -3,6 +3,9 @@
 ## Objective
 Create and run a Jenkins Pipeline with multiple stages (Build, Test, Deploy, Run Application, Test Application) for a Python Flask app, with the pipeline defined as code in a `Jenkinsfile`.
 
+## Environment
+Windows 11 + WSL2 (Ubuntu) + Docker Desktop; Jenkins runs in a Docker container (`jenkins/jenkins:lts`, UI on port 8080).
+
 ## Repository used by Jenkins
 **https://github.com/mridulaachar3/devops-sample-code** (same repository as Exercise 8, as per the manual)
 
@@ -124,3 +127,7 @@ stage('Code Quality') {
 
 ### Step 8: manual's python3.11-venv not available, python3-venv used instead
 ![venv](screenshots/8.png)
+
+## Changes from the Manual
+- The files were pushed from the existing `devops-sample-code` clone instead of a new `git init`, because that repository already has the Exercise 8 commit.
+- `python3-venv` instead of `python3.11-venv`, because this Jenkins image ships Python 3.13.

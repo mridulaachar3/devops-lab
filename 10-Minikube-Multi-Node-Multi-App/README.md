@@ -7,6 +7,9 @@ An e-commerce platform with two services:
 
 Replicas of each service are spread across multiple nodes (pod anti-affinity), so the store stays available even if one node fails.
 
+## Environment
+Windows 11 + WSL2 (Ubuntu) + Docker Desktop; Minikube (Docker driver, started with `--container-runtime=docker`) and kubectl.
+
 ## Files
 | File | Purpose |
 |------|---------|

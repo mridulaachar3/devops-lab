@@ -99,3 +99,11 @@ This confirms the profile is only recorded, not enforced, on this platform.
 3. **Why restrict access to `/etc/` and `/var/`?** They contain system configuration and sensitive data; restricting them stops a container from reading or modifying important system files.
 4. **What other capabilities can be restricted?** Network access, binding to ports, executing binaries, writing to directories, and admin capabilities such as `sys_admin`.
 5. **How do you verify a profile is applied?** Inspect the container (Docker SDK `inspect_container` or `docker inspect`) and check `HostConfig.SecurityOpt`. As this exercise shows, that only proves the option was recorded; enforcement also requires AppArmor to be enabled in the host kernel.
+
+## Learnings
+- An AppArmor profile is a Linux kernel feature. `docker run --security-opt="apparmor=<profile>"` only records the profile name; the kernel enforces it only if AppArmor is enabled.
+- `docker inspect` (or the Docker SDK's `inspect_container`) shows `HostConfig.SecurityOpt`, which proves the option was passed, not that it is enforced.
+- The Docker SDK for Python can build, run and test containers from a script, which makes the security check repeatable.
+
+## Result
+All five tasks of the manual were carried out. The container ran with `apparmor=my-apparmor-profile` and the SDK scripts reported it. On WSL2 the kernel has AppArmor disabled, so the profile was not enforced: `cat /etc/passwd` and `/bin/bash` both returned exit code 0 instead of the expected 1 and 126. On a native Linux host with AppArmor enabled, the same files and commands give the manual's expected results.
