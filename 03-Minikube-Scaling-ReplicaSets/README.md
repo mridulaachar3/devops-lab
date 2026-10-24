@@ -113,3 +113,4 @@ kubectl get pods -o wide
 - **Pod distribution:** each Pod is an identical worker; scaling creates clones of the app.
 - **Resiliency:** if a Pod fails, the ReplicaSet creates another, so users don't notice downtime.
 - **Efficiency:** add Pods when demand spikes and remove them when it drops.
+- **Scalability in the real world:** this is how Netflix, YouTube or Swiggy scale their microservices to handle peak traffic hours.

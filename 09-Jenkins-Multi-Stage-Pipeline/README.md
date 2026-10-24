@@ -32,6 +32,7 @@ Copies of all files are kept in this folder for reference.
 Jenkins runs in Docker (see Exercise 7). Files: `app.py`, `requirements.txt`, `test_app.py`.
 
 ### Step 3: Push the application to GitHub
+The manual creates a new folder and runs `git init` and `git remote add origin ...`. Here the files were added to the existing local clone of `devops-sample-code` from Exercise 8, which already has the remote set (a fresh `git init` push would be rejected because the repository already contains the Exercise 8 commit):
 ~~~bash
 git add .
 git commit -m "Initial commit"
@@ -55,7 +56,7 @@ git push
 - Script Path: `Jenkinsfile`
 
 ### Step 7: Run the pipeline
-**Build Now** → all stages pass.
+**Build Now** → the first build **fails** in the Test stage with `python3: not found`, because the Jenkins image has no Python (as the manual warns in Step 8). After the fix in Step 8, **Build Now** again → all stages pass.
 
 ### Step 8: Handling build errors
 The Jenkins image has no Python, so the first build fails. As in the manual, log into the Jenkins container as root and install the dependencies:
@@ -67,7 +68,7 @@ Inside the container shell (`root@<container-id>:/#`):
 ~~~bash
 apt-get update
 apt install -y python3
-apt install -y python3-pip
+apt install -y python3-pip      # manual: apt install pip (apt selects python3-pip for it)
 apt install -y python3-venv      # manual says python3.11-venv; this Jenkins image ships Python 3.13
 apt install -y python3-flask
 ~~~

@@ -28,6 +28,7 @@ chmod +x hello-world.sh
 ~~~
 
 ### 3-6. Initialise Git, commit and push
+`git init -b main` is used instead of the manual's plain `git init`, so the local branch is called `main` and the manual's `git push -u origin main` works (plain `git init` creates `master`, and pushing `main` then fails with `src refspec main does not match any`).
 ~~~bash
 git init -b main
 git add hello-world.sh
